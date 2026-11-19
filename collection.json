@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Pokemon Ruby Sapphire API",
-    "description": "Final Project Backend Basic. Jalankan folder secara berurutan (00 -> 04). Variabel pokemonId terisi otomatis oleh request Create.",
+    "description": "Final Project Backend Basic. Jalankan folder berurutan (00 -> 10). Variabel pokemonId, trainerId, ownedPokemonId, dan boxPokemonId terisi otomatis oleh request Create.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -48,7 +48,8 @@
                 "exec": [
                   "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
                   "const json = pm.response.json();",
-                  "pm.collectionVariables.set(\"pokemonId\", json.data._id);"
+                  "pm.collectionVariables.set(\"pokemonId\", json.data._id);",
+                  "pm.test(\"Stats are calculated\", function () { pm.expect(json.data.maxHp > 0 && json.data.hp === json.data.maxHp).to.be.true; });"
                 ]
               }
             }
@@ -217,7 +218,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });"
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Has pagination info\", function () { pm.expect(json.pagination.page === 1 && json.pagination.limit === 10).to.be.true; });"
                 ]
               }
             }
@@ -338,6 +341,144 @@
                 {
                   "key": "maxLevel",
                   "value": "30"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Pagination: page=1 & limit=2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"At most 2 items\", function () { pm.expect(json.data.length <= 2 && json.pagination.limit === 2).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon?page=1&limit=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "2"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Pagination - invalid limit=0 (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon?limit=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "0"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Query - invalid sort (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon?sort=abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "abc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Query - invalid minLevel (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon?minLevel=abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ],
+              "query": [
+                {
+                  "key": "minLevel",
+                  "value": "abc"
                 }
               ]
             }
@@ -588,6 +729,34 @@
           }
         },
         {
+          "name": "Update - no body at all (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{pokemonId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{pokemonId}}"
+              ]
+            }
+          }
+        },
+        {
           "name": "Update - invalid level (400)",
           "event": [
             {
@@ -680,7 +849,8 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
-                  "pm.test(\"Evolved to Grovyle\", function () { pm.expect(pm.response.json().data.speciesName).to.eql(\"Grovyle\"); });"
+                  "const json = pm.response.json();",
+                  "pm.test(\"Evolved to Grovyle\", function () { pm.expect(json.data.speciesName === \"Grovyle\").to.be.true; });"
                 ]
               }
             }
@@ -792,6 +962,2299 @@
           }
         }
       ]
+    },
+    {
+      "name": "05 - Species",
+      "item": [
+        {
+          "name": "Get all species",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"60 species, 20 per page\", function () { pm.expect(json.pagination.totalItems === 60 && json.data.length === 20).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/species",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "species"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Query: type=Grass",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"All Grass\", function () { pm.expect(json.data.every(s => s.type.includes('Grass'))).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/species?type=Grass",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "species"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "Grass"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Query: search=tree",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Finds Treecko\", function () { pm.expect(json.data.some(s => s.name === 'Treecko')).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/species?search=tree",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "species"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "tree"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Query: legendary=true",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"8 legendary\", function () { pm.expect(json.pagination.totalItems === 8).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/species?legendary=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "species"
+              ],
+              "query": [
+                {
+                  "key": "legendary",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Pagination: page=2 & limit=5",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"5 items on page 2\", function () { pm.expect(json.data.length === 5 && json.pagination.page === 2).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/species?page=2&limit=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "species"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "2"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Query - invalid legendary (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/species?legendary=maybe",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "species"
+              ],
+              "query": [
+                {
+                  "key": "legendary",
+                  "value": "maybe"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Path param: Treecko (252)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Evolves to Grovyle\", function () { pm.expect(json.data.evolvesTo.name === \"Grovyle\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/species/252",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "species",
+                "252"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Path param: Grovyle (253)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Evolves from Treecko\", function () { pm.expect(json.data.evolvesFrom.name === \"Treecko\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/species/253",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "species",
+                "253"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Species - invalid id (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/species/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "species",
+                "abc"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Species - not found (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/species/9999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "species",
+                "9999"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Trainer",
+      "item": [
+        {
+          "name": "Create Trainer (Brendan)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set(\"trainerId\", json.data._id);",
+                  "pm.test(\"Default badges is 0\", function () { pm.expect(json.data.badges === 0).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/trainers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Brendan\",\n  \"hometown\": \"Littleroot Town\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create Trainer - invalid name (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/trainers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"B\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create Trainer - no body (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/trainers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Trainer - invalid badges (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/trainers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"May\",\n  \"badges\": 9\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get all Trainers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/trainers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Query: search=bren",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Finds Brendan\", function () { pm.expect(json.data.some(t => t.name === 'Brendan')).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/trainers?search=bren",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "bren"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Query: hometown=little & sort=name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/trainers?hometown=little&sort=name",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers"
+              ],
+              "query": [
+                {
+                  "key": "hometown",
+                  "value": "little"
+                },
+                {
+                  "key": "sort",
+                  "value": "name"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Query - invalid sort (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/trainers?sort=abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "abc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Path param: get Trainer by id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Has party and box count\", function () { pm.expect(json.data.partyCount === 0 && json.data.boxCount === 0).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/trainers/{{trainerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers",
+                "{{trainerId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Trainer - invalid format (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/trainers/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers",
+                "abc"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Trainer - not found (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/trainers/64b0c0c0c0c0c0c0c0c0c0c0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers",
+                "64b0c0c0c0c0c0c0c0c0c0c0"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Trainer (badges 2)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Badges updated\", function () { pm.expect(json.data.badges === 2).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/trainers/{{trainerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers",
+                "{{trainerId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"badges\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update Trainer - empty body (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/trainers/{{trainerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers",
+                "{{trainerId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update Trainer - invalid badges (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/trainers/{{trainerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers",
+                "{{trainerId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"badges\": 9\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update Trainer - not found (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/trainers/64b0c0c0c0c0c0c0c0c0c0c0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers",
+                "64b0c0c0c0c0c0c0c0c0c0c0"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"badges\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Ownership (Trainer & Party)",
+      "item": [
+        {
+          "name": "Create Pokemon without trainer (Treecko lv 10)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set(\"ownedPokemonId\", json.data._id);",
+                  "pm.test(\"No trainer, no storage\", function () { pm.expect(json.data.trainerId === null && json.data.storage === null).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speciesId\": 252,\n  \"level\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create - unknown trainerId (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speciesId\": 252,\n  \"trainerId\": \"64b0c0c0c0c0c0c0c0c0c0c0\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create - invalid trainerId format (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speciesId\": 252,\n  \"trainerId\": \"abc\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Assign Pokemon to Trainer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Goes to party\", function () { pm.expect(json.data.storage === \"party\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{ownedPokemonId}}/trainer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{ownedPokemonId}}",
+                "trainer"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trainerId\": \"{{trainerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Assign - missing trainerId (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{ownedPokemonId}}/trainer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{ownedPokemonId}}",
+                "trainer"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Unassign Pokemon (trainerId null)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Released\", function () { pm.expect(json.data.trainerId === null && json.data.storage === null).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{ownedPokemonId}}/trainer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{ownedPokemonId}}",
+                "trainer"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trainerId\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Move storage without trainer (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{ownedPokemonId}}/storage",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{ownedPokemonId}}",
+                "storage"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storage\": \"box\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Assign Pokemon to Trainer again",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Goes to party\", function () { pm.expect(json.data.storage === \"party\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{ownedPokemonId}}/trainer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{ownedPokemonId}}",
+                "trainer"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trainerId\": \"{{trainerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Pokemon of Trainer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"1 in party\", function () { pm.expect(json.data.partyCount === 1 && json.data.boxCount === 0).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/trainers/{{trainerId}}/pokemon",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers",
+                "{{trainerId}}",
+                "pokemon"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Pokemon for Trainer (#2)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Goes to party\", function () { pm.expect(json.data.storage === \"party\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speciesId\": 263,\n  \"level\": 5,\n  \"trainerId\": \"{{trainerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create Pokemon for Trainer (#3)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Goes to party\", function () { pm.expect(json.data.storage === \"party\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speciesId\": 263,\n  \"level\": 5,\n  \"trainerId\": \"{{trainerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create Pokemon for Trainer (#4)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Goes to party\", function () { pm.expect(json.data.storage === \"party\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speciesId\": 263,\n  \"level\": 5,\n  \"trainerId\": \"{{trainerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create Pokemon for Trainer (#5)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Goes to party\", function () { pm.expect(json.data.storage === \"party\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speciesId\": 263,\n  \"level\": 5,\n  \"trainerId\": \"{{trainerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create Pokemon for Trainer (#6)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Goes to party\", function () { pm.expect(json.data.storage === \"party\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speciesId\": 263,\n  \"level\": 5,\n  \"trainerId\": \"{{trainerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create Pokemon for Trainer (#7, party full -> box)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set(\"boxPokemonId\", json.data._id);",
+                  "pm.test(\"Goes to box\", function () { pm.expect(json.data.storage === \"box\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speciesId\": 263,\n  \"level\": 5,\n  \"trainerId\": \"{{trainerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Query: trainerId & storage=box",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"1 in box\", function () { pm.expect(json.pagination.totalItems === 1).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon?trainerId={{trainerId}}&storage=box",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ],
+              "query": [
+                {
+                  "key": "trainerId",
+                  "value": "{{trainerId}}"
+                },
+                {
+                  "key": "storage",
+                  "value": "box"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Query - invalid storage (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon?storage=pc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ],
+              "query": [
+                {
+                  "key": "storage",
+                  "value": "pc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Move #7 to party - party full (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{boxPokemonId}}/storage",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{boxPokemonId}}",
+                "storage"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storage\": \"party\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Move first Pokemon to box",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"In box\", function () { pm.expect(json.data.storage === \"box\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{ownedPokemonId}}/storage",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{ownedPokemonId}}",
+                "storage"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storage\": \"box\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Move #7 to party",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"In party\", function () { pm.expect(json.data.storage === \"party\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{boxPokemonId}}/storage",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{boxPokemonId}}",
+                "storage"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storage\": \"party\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Move storage - invalid value (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{boxPokemonId}}/storage",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{boxPokemonId}}",
+                "storage"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storage\": \"pc\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Trainer (party 6, box 1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Counts correct\", function () { pm.expect(json.data.partyCount === 6 && json.data.boxCount === 1).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/trainers/{{trainerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers",
+                "{{trainerId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - Training (EXP)",
+      "item": [
+        {
+          "name": "Add EXP +1000 (level 10 -> 12)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Gained 2 levels\", function () { pm.expect(json.training.levelsGained === 2 && json.data.level === 12).to.be.true; });",
+                  "pm.test(\"Stats updated\", function () { pm.expect(json.data.maxHp > 0).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{ownedPokemonId}}/exp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{ownedPokemonId}}",
+                "exp"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"exp\": 1000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Add EXP +50 (no level up)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"No level gained\", function () { pm.expect(json.training.levelsGained === 0).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{ownedPokemonId}}/exp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{ownedPokemonId}}",
+                "exp"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"exp\": 50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Add EXP - invalid value 0 (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{ownedPokemonId}}/exp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{ownedPokemonId}}",
+                "exp"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"exp\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Add EXP - not a number (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{ownedPokemonId}}/exp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{ownedPokemonId}}",
+                "exp"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"exp\": \"banyak\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Add EXP - no body (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{ownedPokemonId}}/exp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{ownedPokemonId}}",
+                "exp"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add EXP - not found (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/64b0c0c0c0c0c0c0c0c0c0c0/exp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "64b0c0c0c0c0c0c0c0c0c0c0",
+                "exp"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"exp\": 100\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Add EXP +5000000 (reach level 100)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Max level\", function () { pm.expect(json.data.level === 100 && json.training.expToNextLevel === 0).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{ownedPokemonId}}/exp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{ownedPokemonId}}",
+                "exp"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"exp\": 5000000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Add EXP - already max level (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{ownedPokemonId}}/exp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{ownedPokemonId}}",
+                "exp"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"exp\": 100\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 - Statistics",
+      "item": [
+        {
+          "name": "Get collection statistics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Has totals\", function () { pm.expect(json.data.totalPokemon >= 7 && json.data.ownership.withTrainer >= 7).to.be.true; });",
+                  "pm.test(\"Has type breakdown\", function () { pm.expect(json.data.byType.Grass >= 1).to.be.true; });",
+                  "pm.test(\"Strongest is level 100\", function () { pm.expect(json.data.strongestPokemon.level === 100).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "stats"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 - Cleanup",
+      "item": [
+        {
+          "name": "Delete Trainer (Pokemon released)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"7 Pokemon released\", function () { pm.expect(json.releasedPokemon === 7).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/trainers/{{trainerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers",
+                "{{trainerId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Trainer again - not found (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/trainers/{{trainerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers",
+                "{{trainerId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Pokemon after Trainer deleted",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"No trainer\", function () { pm.expect(json.data.trainerId === null && json.data.storage === null).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{ownedPokemonId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{ownedPokemonId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete test Pokemon",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{ownedPokemonId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{ownedPokemonId}}"
+              ]
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [
@@ -801,6 +3264,18 @@
     },
     {
       "key": "pokemonId",
+      "value": ""
+    },
+    {
+      "key": "trainerId",
+      "value": ""
+    },
+    {
+      "key": "ownedPokemonId",
+      "value": ""
+    },
+    {
+      "key": "boxPokemonId",
       "value": ""
     }
   ]
