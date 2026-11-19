@@ -16,6 +16,9 @@ const pokemonSchema = new mongoose.Schema(
       speed: Number,
     },
     heldItem: { type: String, default: null },
+    // Relasi opsional ke Trainer. Jika tidak punya trainer, trainerId dan storage bernilai null
+    trainerId: { type: mongoose.Schema.Types.ObjectId, ref: "Trainer", default: null },
+    storage: { type: String, enum: ["party", "box", null], default: null },
   },
   { timestamps: true }
 );
