@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Pokemon Ruby Sapphire API",
-    "description": "Final Project Backend Basic. Jalankan folder berurutan (00 -> 10). Variabel pokemonId, trainerId, ownedPokemonId, dan boxPokemonId terisi otomatis oleh request Create.",
+    "description": "Final Project Backend Basic. Jalankan folder berurutan (00 -> 10). Folder 11 adalah alur demo presentasi yang berdiri sendiri. Variabel pokemonId, trainerId, ownedPokemonId, dan boxPokemonId terisi otomatis oleh request Create.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -3255,6 +3255,980 @@
           }
         }
       ]
+    },
+    {
+      "name": "11 - Demo Presentasi",
+      "item": [
+        {
+          "name": "1. Buat Trainer (May)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set(\"demoTrainerId\", json.data._id);",
+                  "pm.collectionVariables.set(\"demoPokemonIds\", \"[]\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/trainers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"May\",\n  \"hometown\": \"Petalburg City\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "2. Lihat info spesies Treecko (Pokedex)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Treecko berevolusi ke Grovyle\", function () { pm.expect(json.data.evolvesTo.name === \"Grovyle\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/species/252",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "species",
+                "252"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3. Tangkap Treecko lv 10 untuk May",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set(\"demoPokemonId\", json.data._id);",
+                  "const ids = JSON.parse(pm.collectionVariables.get(\"demoPokemonIds\") || \"[]\"); ids.push(json.data._id); pm.collectionVariables.set(\"demoPokemonIds\", JSON.stringify(ids));",
+                  "pm.test(\"Masuk party\", function () { pm.expect(json.data.storage === \"party\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speciesId\": 252,\n  \"level\": 10,\n  \"nickname\": \"Leafy\",\n  \"trainerId\": \"{{demoTrainerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "4. Lihat detail Pokemon (path param)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Nickname Leafy\", function () { pm.expect(json.data.nickname === \"Leafy\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{demoPokemonId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{demoPokemonId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "5. Evolusi gagal - level belum cukup (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{demoPokemonId}}/evolve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{demoPokemonId}}",
+                "evolve"
+              ]
+            }
+          }
+        },
+        {
+          "name": "6. Training: tambah EXP +4000",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Naik 7 level (10 -> 17)\", function () { pm.expect(json.training.levelsGained === 7 && json.data.level === 17).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{demoPokemonId}}/exp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{demoPokemonId}}",
+                "exp"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"exp\": 4000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "7. Evolusi berhasil: Treecko -> Grovyle",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Jadi Grovyle\", function () { pm.expect(json.data.speciesName === \"Grovyle\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{demoPokemonId}}/evolve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{demoPokemonId}}",
+                "evolve"
+              ]
+            }
+          }
+        },
+        {
+          "name": "8. Isi party (#2 dari 6)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "const ids = JSON.parse(pm.collectionVariables.get(\"demoPokemonIds\") || \"[]\"); ids.push(json.data._id); pm.collectionVariables.set(\"demoPokemonIds\", JSON.stringify(ids));",
+                  "pm.test(\"Masuk party\", function () { pm.expect(json.data.storage === \"party\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speciesId\": 263,\n  \"level\": 5,\n  \"nickname\": \"Zig\",\n  \"trainerId\": \"{{demoTrainerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "8. Isi party (#3 dari 6)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "const ids = JSON.parse(pm.collectionVariables.get(\"demoPokemonIds\") || \"[]\"); ids.push(json.data._id); pm.collectionVariables.set(\"demoPokemonIds\", JSON.stringify(ids));",
+                  "pm.test(\"Masuk party\", function () { pm.expect(json.data.storage === \"party\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speciesId\": 263,\n  \"level\": 5,\n  \"nickname\": \"Zig\",\n  \"trainerId\": \"{{demoTrainerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "8. Isi party (#4 dari 6)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "const ids = JSON.parse(pm.collectionVariables.get(\"demoPokemonIds\") || \"[]\"); ids.push(json.data._id); pm.collectionVariables.set(\"demoPokemonIds\", JSON.stringify(ids));",
+                  "pm.test(\"Masuk party\", function () { pm.expect(json.data.storage === \"party\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speciesId\": 263,\n  \"level\": 5,\n  \"nickname\": \"Zig\",\n  \"trainerId\": \"{{demoTrainerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "8. Isi party (#5 dari 6)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "const ids = JSON.parse(pm.collectionVariables.get(\"demoPokemonIds\") || \"[]\"); ids.push(json.data._id); pm.collectionVariables.set(\"demoPokemonIds\", JSON.stringify(ids));",
+                  "pm.test(\"Masuk party\", function () { pm.expect(json.data.storage === \"party\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speciesId\": 263,\n  \"level\": 5,\n  \"nickname\": \"Zig\",\n  \"trainerId\": \"{{demoTrainerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "8. Isi party (#6 dari 6)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "const ids = JSON.parse(pm.collectionVariables.get(\"demoPokemonIds\") || \"[]\"); ids.push(json.data._id); pm.collectionVariables.set(\"demoPokemonIds\", JSON.stringify(ids));",
+                  "pm.test(\"Masuk party\", function () { pm.expect(json.data.storage === \"party\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speciesId\": 263,\n  \"level\": 5,\n  \"nickname\": \"Zig\",\n  \"trainerId\": \"{{demoTrainerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "9. Pokemon ke-7 otomatis masuk box",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set(\"demoBoxPokemonId\", json.data._id);",
+                  "const ids = JSON.parse(pm.collectionVariables.get(\"demoPokemonIds\") || \"[]\"); ids.push(json.data._id); pm.collectionVariables.set(\"demoPokemonIds\", JSON.stringify(ids));",
+                  "pm.test(\"Party penuh, masuk box\", function () { pm.expect(json.data.storage === \"box\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speciesId\": 263,\n  \"level\": 5,\n  \"nickname\": \"Zag\",\n  \"trainerId\": \"{{demoTrainerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "10. Pindah ke party - party penuh (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{demoBoxPokemonId}}/storage",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{demoBoxPokemonId}}",
+                "storage"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storage\": \"party\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "11. Pindahkan Grovyle ke box",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Di box\", function () { pm.expect(json.data.storage === \"box\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{demoPokemonId}}/storage",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{demoPokemonId}}",
+                "storage"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storage\": \"box\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "12. Pindahkan Pokemon ke-7 ke party (ada slot)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Di party\", function () { pm.expect(json.data.storage === \"party\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{demoBoxPokemonId}}/storage",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{demoBoxPokemonId}}",
+                "storage"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storage\": \"party\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "13. Daftar Pokemon milik May (party & box)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Party 6, box 1\", function () { pm.expect(json.data.partyCount === 6 && json.data.boxCount === 1).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/trainers/{{demoTrainerId}}/pokemon",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers",
+                "{{demoTrainerId}}",
+                "pokemon"
+              ]
+            }
+          }
+        },
+        {
+          "name": "14. Query: Pokemon May urut level tertinggi",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Grovyle paling atas\", function () { pm.expect(json.data[0].speciesName === \"Grovyle\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon?trainerId={{demoTrainerId}}&sort=-level",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ],
+              "query": [
+                {
+                  "key": "trainerId",
+                  "value": "{{demoTrainerId}}"
+                },
+                {
+                  "key": "sort",
+                  "value": "-level"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "15. Pagination: 3 Pokemon per halaman",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"3 item, 7 total, 3 halaman\", function () { pm.expect(json.count === 3 && json.pagination.totalItems === 7 && json.pagination.totalPages === 3).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon?trainerId={{demoTrainerId}}&page=1&limit=3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ],
+              "query": [
+                {
+                  "key": "trainerId",
+                  "value": "{{demoTrainerId}}"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "3"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "16. Statistik koleksi",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Ada data statistik\", function () { pm.expect(json.data.totalPokemon >= 7 && json.data.byType.Grass >= 1).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "stats"
+              ]
+            }
+          }
+        },
+        {
+          "name": "17. Error: spesies tidak ada (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speciesId\": 99999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "18. Error: Pokemon tidak ditemukan (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/64b0c0c0c0c0c0c0c0c0c0c0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "64b0c0c0c0c0c0c0c0c0c0c0"
+              ]
+            }
+          }
+        },
+        {
+          "name": "19. Error: EXP bukan angka (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{demoPokemonId}}/exp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{demoPokemonId}}",
+                "exp"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"exp\": \"banyak\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "20. Bersihkan data demo (hapus Trainer dan Pokemon demo)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"7 Pokemon dilepas\", function () { pm.expect(json.releasedPokemon === 7).to.be.true; });",
+                  "const base = pm.variables.get(\"baseUrl\");",
+                  "const ids = JSON.parse(pm.collectionVariables.get(\"demoPokemonIds\") || \"[]\");",
+                  "ids.forEach(function (id) { pm.sendRequest({ url: base + \"/pokemon/\" + id, method: \"DELETE\" }, function () {}); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/trainers/{{demoTrainerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trainers",
+                "{{demoTrainerId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "21. Verifikasi: Pokemon demo sudah terhapus (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pokemon/{{demoPokemonId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pokemon",
+                "{{demoPokemonId}}"
+              ]
+            }
+          }
+        }
+      ],
+      "description": "Alur demo yang berdiri sendiri (punya Trainer dan variabel sendiri) dan membersihkan datanya di akhir. Jalankan dengan klik kanan folder -> Run folder."
     }
   ],
   "variable": [
@@ -3276,6 +4250,22 @@
     },
     {
       "key": "boxPokemonId",
+      "value": ""
+    },
+    {
+      "key": "demoTrainerId",
+      "value": ""
+    },
+    {
+      "key": "demoPokemonId",
+      "value": ""
+    },
+    {
+      "key": "demoBoxPokemonId",
+      "value": ""
+    },
+    {
+      "key": "demoPokemonIds",
       "value": ""
     }
   ]
