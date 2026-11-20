@@ -261,10 +261,13 @@ Parameter dapat digabung, misalnya `GET /pokemon?type=Grass&minLevel=10&sort=-le
 ## Pengujian API
 
 Seluruh endpoint diuji menggunakan Postman. File koleksi tersedia di repository:
-`collection.json` (87 request dalam 11 folder).
+`collection.json` (112 request dalam 12 folder).
 
-Cara memakai: buka Postman -> **Import** -> pilih file koleksi -> pastikan server berjalan -> **Run collection**.
-Variabel `pokemonId`, `trainerId`, `ownedPokemonId`, dan `boxPokemonId` terisi otomatis oleh request Create.
+Folder `11 - Demo Presentasi` berisi alur demo yang berdiri sendiri dan membersihkan datanya sendiri; jalankan lewat klik kanan folder -> Run folder.
+
+Cara memakai: buka Postman -> **Import** -> pilih file koleksi -> pastikan server berjalan -> **Run collection**
+untuk menguji semua endpoint (folder 00-10). Variabel `pokemonId`, `trainerId`, `ownedPokemonId`, dan `boxPokemonId`
+terisi otomatis oleh request Create.
 Setiap request memiliki skrip tes untuk memeriksa status code dan isi response, mencakup CRUD, Path Parameter,
 Query Parameter, pagination, relasi Trainer, training, statistik, dan kasus error (400/404).
 
